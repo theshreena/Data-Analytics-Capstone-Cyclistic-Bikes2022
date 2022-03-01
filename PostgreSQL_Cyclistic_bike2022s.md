@@ -102,7 +102,7 @@ FROM tripdata;
 
 ```sql
 SELECT rideable_type AS available_bikes,
-count (rideable_type) AS numberofbikes
+count (ride_id) AS numberofbikes    
 FROM tripdata
 GROUP BY rideable_type;
 
@@ -220,7 +220,7 @@ FROM tripdata;
 +-------------+
 
 SELECT member_casual,
-count(member_casual) AS numberofmembers
+count(ride_id) AS numberofmembers
 FROM tripdata
 GROUP BY member_casual;
 
@@ -247,6 +247,8 @@ WHERE ended_at > started_at;
 |4584720   |
 +----------+
 
+-- ended_at > started_at is valid as end date should be greater than started date
+
 SELECT count(ride_id) As difference
 FROM tripdata
 WHERE ended_at <= started_at;
@@ -257,6 +259,7 @@ WHERE ended_at <= started_at;
 +----------+
 |201       |
 +----------+
+-- how many invalid entries present
 ```
 
 ### Eliminating and excluding anomalies and outliers
@@ -374,41 +377,41 @@ FROM vdraft2
 Calculating number of monthly casual and member bikers,
 
 ```sql
-SELECT date_trunc('month', started_at) AS monthwise,
+SELECT to_char(started_at, 'YYYY-MM') AS monthwise,
        count(ride_id) AS count,
        member_casual
 FROM vdraft2
-GROUP BY date_trunc('month',started_at),
-         member_casual;
+GROUP BY monthwise, member_casual;
+
 #Result
-+--------------------------+------+-------------+
-|monthwise                 |count |member_casual|
-+--------------------------+------+-------------+
-|2021-02-01 00:00:00.000000|8463  |casual       |
-|2021-02-01 00:00:00.000000|33394 |member       |
-|2021-03-01 00:00:00.000000|74597 |casual       |
-|2021-03-01 00:00:00.000000|126513|member       |
-|2021-04-01 00:00:00.000000|118626|casual       |
-|2021-04-01 00:00:00.000000|172851|member       |
-|2021-05-01 00:00:00.000000|213159|casual       |
-|2021-05-01 00:00:00.000000|227212|member       |
-|2021-06-01 00:00:00.000000|298509|casual       |
-|2021-06-01 00:00:00.000000|295613|member       |
-|2021-07-01 00:00:00.000000|362774|casual       |
-|2021-07-01 00:00:00.000000|312929|member       |
-|2021-08-01 00:00:00.000000|335748|casual       |
-|2021-08-01 00:00:00.000000|322862|member       |
-|2021-09-01 00:00:00.000000|288019|casual       |
-|2021-09-01 00:00:00.000000|318312|member       |
-|2021-10-01 00:00:00.000000|185915|casual       |
-|2021-10-01 00:00:00.000000|278812|member       |
-|2021-11-01 00:00:00.000000|68685 |casual       |
-|2021-11-01 00:00:00.000000|178848|member       |
-|2021-12-01 00:00:00.000000|44327 |casual       |
-|2021-12-01 00:00:00.000000|126202|member       |
-|2022-01-01 00:00:00.000000|12369 |casual       |
-|2022-01-01 00:00:00.000000|64994 |member       |
-+--------------------------+------+-------------+
++---------+------+-------------+
+|monthwise|count |member_casual|
++---------+------+-------------+
+|2021-02  |8463  |casual       |
+|2021-02  |33394 |member       |
+|2021-03  |74597 |casual       |
+|2021-03  |126513|member       |
+|2021-04  |118626|casual       |
+|2021-04  |172851|member       |
+|2021-05  |213159|casual       |
+|2021-05  |227212|member       |
+|2021-06  |298509|casual       |
+|2021-06  |295613|member       |
+|2021-07  |362774|casual       |
+|2021-07  |312929|member       |
+|2021-08  |335748|casual       |
+|2021-08  |322862|member       |
+|2021-09  |288019|casual       |
+|2021-09  |318312|member       |
+|2021-10  |185915|casual       |
+|2021-10  |278812|member       |
+|2021-11  |68685 |casual       |
+|2021-11  |178848|member       |
+|2021-12  |44327 |casual       |
+|2021-12  |126202|member       |
+|2022-01  |12369 |casual       |
+|2022-01  |64994 |member       |
++---------+------+-------------+
 --monthwise counts of casual and members
 ```
 ### Cleaned, filtered, sorted and excluded anomalies to help in the analysis
