@@ -2,27 +2,28 @@
 
 # Google-Data-Analytics-Capstone-Project-2022
 
-## ****Finding how Cyclistic Bikes Annual members and Casual riders use bikes****
+## ****Compare how Cyclistic Bikes Member and Casual riders use bikes****
 
-**The objective is to analyze how casual riders and annual membership use bikes differently**. 
+**The objective is to compare how casual riders and annual membership use bikes differently to help build new marketing strategy to convert casual riders to member**. 
 
-A fictional company called Cyclistic bikes data has been provided in CSV format. The data for this company can be found in the following website (https://divvy-tripdata.s3.amazonaws.com/index.html).
+A fictional company called Cyclistic bikes data has been provided in CSV format. The data for this company can be found in the following website [(https://divvy-tripdata.s3.amazonaws.com/index.html).](https://divvy-tripdata.s3.amazonaws.com/index.html)
 
-To start the project, accessed the server by using DataGrip and used PostgresSQL as the database to run the queries.
+Used 12 months CSV data from February 2021 till January 2022.
 
-Used PostgreSQL script to clean, filter, sort and create new table to help with the analysis for the Cyclistic Bike Capstone project of Google Data Analytics Certification.
+To start the project, the data was loaded onto DataGrip creating **divvy** database. Under divvy database, **tripdata** table was created to run the queries through PostgreSQL.
+
+Used PostgreSQL script to clean, filter, sort and create new table to help with the analysis for the Cyclistic Bikes Capstone project of Google Data Analytics Certification.
 
 The steps taken are as follows:
 
-1. Imported 12 months CVS data from the server and compile into one table
+1. Imported 12 months CSV data from the server and compile into one table **tripdata**
 2. Inspecting for anomalies and outliers
 3. Eliminating and excluding anomalies and outliers
-4. Performed basic calculations to help compare in RStudio
-5. Created final table version to upload onto RStudio for data visualization and analysis
+4. Performed calculations to analyze
 
 ### Inspecting for anomalies or outliers:
 
-Checking and comparing if there are any discrepancies on the total count of each columns,
+Counting each column to check if there is any anomalies present,
 
 ```sql
 SELECT
@@ -41,6 +42,8 @@ FROM tripdata;
 +----------+-------------------+---------------+-------------+------------------+----------------+----------------+
 |5601999   |5601999            |5601999        |5601999      |4903555           |4855179         |5601999         |
 +----------+-------------------+---------------+-------------+------------------+----------------+----------------+
+
+-- The result shows that there are anomalies present in start and end station
 ```
 
 Querying if ride_id has any discrepancies in the length of the text,
@@ -56,35 +59,10 @@ GROUP BY Length(ride_id);
 +----------+
 |16        |
 +----------+
+-- The outcome shows that all the ride_id's are 16 character in length
 ```
 
-Double checking if ride_id column has any empty or NULL present,
-
-```sql
-SELECT count(ride_id)
-FROM tripdata
-where ride_id LIKE ' ';
-
-#Result
-+-----+
-|count|
-+-----+
-|0    |
-+-----+
-
-SELECT count(ride_id)
-FROM tripdata
-where ride_id IS NULL;
-
-#Result
-+-----+
-|count|
-+-----+
-|0    |
-+-----+
-```
-
-Finding how many types and numbers of bikes(initially) are available,
+Finding how many types of bikes,
 
 ```sql
 SELECT DISTINCT (rideable_type) AS available_bikes
@@ -98,71 +76,12 @@ FROM tripdata;
 |classic_bike   |
 |electric_bike  |
 +---------------+
-```
-
-```sql
-SELECT rideable_type AS available_bikes,
-count (ride_id) AS numberofbikes    
-FROM tripdata
-GROUP BY rideable_type;
-
-#Result
-+---------------+-------------+
-|available_bikes|numberofbikes|
-+---------------+-------------+
-|classic_bike   |3244395      |
-|docked_bike    |311198       |
-|electric_bike  |2046406      |
-+---------------+-------------+
-```
-
-Double checking if rideable_type column has any empty or NULL present, 
-
-```sql
-SELECT count(rideable_type)
-FROM tripdata
-where tripdata.rideable_type like ' ';
-
-#Result
-+-----+
-|count|
-+-----+
-|0    |
-+-----+
-
-SELECT count(rideable_type)
-FROM tripdata
-where tripdata.rideable_type IS NULL;
-
-#Result
-+-----+
-|count|
-+-----+
-|0    |
-+-----+
-```
-
-Double checking started_at and ended_at column counts incase of any NULL present by comparing with the previous count query,
-
-```sql
-SELECT Count (started_at) AS startdate_nonull,
-       count (ended_at) AS enddate_nonull
-FROM tripdata
-WHERE started_at IS NOT NULL
-AND ended_at IS NOT NULL;
-
-#Result
-+----------------+--------------+
-|startdate_nonull|enddate_nonull|
-+----------------+--------------+
-|5601999         |5601999       |
-+----------------+--------------+
+--There are thre types of bikes available to ride
 ```
 
 Running query to confirm presence of empty or NULL in start_station_name, start_station_id, end_station_name and end_station_id,
 
 ```sql
--- Identified in the count query of NULL or empty column presence which is confirmed from below query too
 
 SELECT count(ride_id) as null_count
 FROM tripdata
@@ -187,25 +106,11 @@ OR end_station_id = ' ';
 +----------+
 |746820    |
 +----------+
+
+-- The result shows that there is NULL or empty space present
 ```
 
-Checking empty space or NULL present in member_causal column,
-
-```sql
-SELECT count(member_casual) as null_count
-FROM tripdata
-WHERE member_casual is null
-OR member_casual = ' ';
-
-#Result
-+----------+
-|null_count|
-+----------+
-|0         |
-+----------+
-```
-
-Confirming membership types and existing numbers of the members(initially),
+Confirming membership types of riders,
 
 ```sql
 SELECT DISTINCT (member_casual)
@@ -219,18 +124,6 @@ FROM tripdata;
 |casual       |
 +-------------+
 
-SELECT member_casual,
-count(ride_id) AS numberofmembers
-FROM tripdata
-GROUP BY member_casual;
-
-#Result
-+-------------+---------------+
-|member_casual|numberofmembers|
-+-------------+---------------+
-|casual       |2529408        |
-|member       |3072591        |
-+-------------+---------------+
 ```
 
 Checking accuracy of date and time,
@@ -301,6 +194,7 @@ FROM vdraft_cb;
 +-------+
 |4584921|
 +-------+
+-- Created a table to remove NULL from the entire file. This deletion updated the entire tripdata. 
 ```
 
 ```sql
@@ -318,6 +212,7 @@ SELECT vdraft_cb.ride_id,
 FROM vdraft_cb
 WHERE vdraft_cb.ended_at > vdraft_cb.started_at
   AND (vdraft_cb.ended_at - vdraft_cb.started_at) > '00:02:00'::interval
+AND (vdraft_cb.ended_at - vdraft_cb.started_at) < '24:00:00'::interval
 ORDER BY (vdraft_cb.ended_at - vdraft_cb.started_at);
 
 #Result
@@ -328,10 +223,8 @@ ORDER BY (vdraft_cb.ended_at - vdraft_cb.started_at);
 |7CDFAAFCD77D3AF0|classic_bike |2022-01-01 04:48:16.000000|2022-01-01 04:50:17.000000|0 years 0 mons 0 days 0 hours 2 mins 1.0 secs|Sheffield Ave & Waveland Ave|TA1307000126    |Sheridan Rd & Irving Park Rd|13063         |member       |
 +----------------+-------------+--------------------------+--------------------------+---------------------------------------------+----------------------------+----------------+----------------------------+--------------+-------------+
 
--- The riders who have ridden 2 minutes and more are only included
+-- The riders who rid for 2 minutes and more are only included. Similarly, since only day pass or full day pass is available, only those customers who have duration below 24 hours valid
 ```
-
-### Basic calculations to compare and double check in RStudio,
 
 Counting each columns to make sure it has same numbers of data,
 
@@ -350,71 +243,15 @@ FROM vdraft2;
 +----------+-------------------+---------------+-------------+------------------+----------------+----------------+
 |count_ride|count_rideable_type|count_starttime|count_endtime|count_startstation|count_endstation|count_membership|
 +----------+-------------------+---------------+-------------+------------------+----------------+----------------+
-|4469733   |4469733            |4469733        |4469733      |4469733           |4469733         |4469733         |
+|4468450   |4468450            |4468450        |4468450      |4468450           |4468450         |4468450         |
 +----------+-------------------+---------------+-------------+------------------+----------------+----------------+
 
---Shows the columns have accurate data
+--The count of all the columns same
 ```
 
-Calculating duration to check the accuracy in RStudio,
+### Performing calculations to analyze data
 
-```sql
-SELECT max(duration) AS max_duration,
-       min(duration) AS min_duration,
-       avg(duration) AS avg_duration
-FROM vdraft2
-
-#Result
-+------------+----------------------------------------------------+
-|max_duration|0 years 0 mons 38 days 20 hours 24 mins 9.0 secs    |
-+------------+----------------------------------------------------+
-|min_duration|0 years 0 mons 0 days 0 hours 5 mins 1.0 secs       |
-+------------+----------------------------------------------------+
-|avg_duration|0 years 0 mons 0 days 0 hours 24 mins 56.789892 secs|
-+------------+----------------------------------------------------+
-```
-
-Calculating number of monthly casual and member bikers,
-
-```sql
-SELECT to_char(started_at, 'YYYY-MM') AS monthwise,
-       count(ride_id) AS count,
-       member_casual
-FROM vdraft2
-GROUP BY monthwise, member_casual;
-
-#Result
-+---------+------+-------------+
-|monthwise|count |member_casual|
-+---------+------+-------------+
-|2021-02  |8463  |casual       |
-|2021-02  |33394 |member       |
-|2021-03  |74597 |casual       |
-|2021-03  |126513|member       |
-|2021-04  |118626|casual       |
-|2021-04  |172851|member       |
-|2021-05  |213159|casual       |
-|2021-05  |227212|member       |
-|2021-06  |298509|casual       |
-|2021-06  |295613|member       |
-|2021-07  |362774|casual       |
-|2021-07  |312929|member       |
-|2021-08  |335748|casual       |
-|2021-08  |322862|member       |
-|2021-09  |288019|casual       |
-|2021-09  |318312|member       |
-|2021-10  |185915|casual       |
-|2021-10  |278812|member       |
-|2021-11  |68685 |casual       |
-|2021-11  |178848|member       |
-|2021-12  |44327 |casual       |
-|2021-12  |126202|member       |
-|2022-01  |12369 |casual       |
-|2022-01  |64994 |member       |
-+---------+------+-------------+
---monthwise counts of casual and members
-```
-### Cleaned, filtered, sorted and excluded anomalies to help in the analysis
+Simplified the data by using concatenate and adding a column ‘duration’,
 
 ```sql
 CREATE VIEW vfinal_cb AS
@@ -436,3 +273,164 @@ FROM vdraft2;
 |7CDFAAFCD77D3AF0|classic_bike |2022-01-01 04:48:16.000000|2022-01-01 04:50:17.000000|0 years 0 mons 0 days 0 hours 2 mins 1.0 secs|Sheffield Ave & Waveland Ave TA1307000126|Sheridan Rd & Irving Park Rd 13063  |member       |
 +----------------+-------------+--------------------------+--------------------------+---------------------------------------------+-----------------------------------------+------------------------------------+-------------+
 ```
+
+Comparing average duration of casual and member riders in monthly basis,
+
+```sql
+SELECT to_char(started_at, 'YYYY-MM') AS monthwise,
+       member_casual,
+       avg(duration) AS average_duration
+FROM vfinal_cb
+GROUP BY monthwise, member_casual;
+
+#Result
+
++---------+-------------+----------------------------------------------------+
+|monthwise|member_casual|average_duration                                    |
++---------+-------------+----------------------------------------------------+
+|2021-02  |casual       |0 years 0 mons 0 days 0 hours 31 mins 34.935205 secs|
+|2021-02  |member       |0 years 0 mons 0 days 0 hours 15 mins 6.331606 secs |
+|2021-03  |casual       |0 years 0 mons 0 days 0 hours 32 mins 38.921403 secs|
+|2021-03  |member       |0 years 0 mons 0 days 0 hours 14 mins 0.382968 secs |
+|2021-04  |casual       |0 years 0 mons 0 days 0 hours 32 mins 33.906141 secs|
+|2021-04  |member       |0 years 0 mons 0 days 0 hours 14 mins 37.517301 secs|
+|2021-05  |casual       |0 years 0 mons 0 days 0 hours 33 mins 40.572118 secs|
+|2021-05  |member       |0 years 0 mons 0 days 0 hours 14 mins 44.050614 secs|
+|2021-06  |casual       |0 years 0 mons 0 days 0 hours 31 mins 18.650769 secs|
+|2021-06  |member       |0 years 0 mons 0 days 0 hours 14 mins 31.80862 secs |
+|2021-07  |casual       |0 years 0 mons 0 days 0 hours 28 mins 57.442733 secs|
+|2021-07  |member       |0 years 0 mons 0 days 0 hours 14 mins 11.970594 secs|
+|2021-08  |casual       |0 years 0 mons 0 days 0 hours 27 mins 32.239953 secs|
+|2021-08  |member       |0 years 0 mons 0 days 0 hours 13 mins 55.808297 secs|
+|2021-09  |casual       |0 years 0 mons 0 days 0 hours 26 mins 37.412517 secs|
+|2021-09  |member       |0 years 0 mons 0 days 0 hours 13 mins 30.442233 secs|
+|2021-10  |casual       |0 years 0 mons 0 days 0 hours 24 mins 44.813499 secs|
+|2021-10  |member       |0 years 0 mons 0 days 0 hours 12 mins 24.559898 secs|
+|2021-11  |casual       |0 years 0 mons 0 days 0 hours 20 mins 32.130969 secs|
+|2021-11  |member       |0 years 0 mons 0 days 0 hours 11 mins 18.935536 secs|
+|2021-12  |casual       |0 years 0 mons 0 days 0 hours 20 mins 27.331143 secs|
+|2021-12  |member       |0 years 0 mons 0 days 0 hours 10 mins 57.697041 secs|
+|2022-01  |casual       |0 years 0 mons 0 days 0 hours 18 mins 24.239718 secs|
+|2022-01  |member       |0 years 0 mons 0 days 0 hours 10 mins 37.410976 secs|
++---------+-------------+----------------------------------------------------+
+
+--Casual riders' duration is more than members 
+```
+
+Calculating to result the same in Tableau visualization analysis,
+
+```sql
+Select member_casual, count(ride_id) AS total_count
+From vfinal_cb
+GROUP BY member_casual;
+
+#Result
++-------------+-----------+
+|member_casual|total_count|
++-------------+-----------+
+|casual       |2009928    |
+|member       |2458522    |
++-------------+-----------+
+
+SELECT member_casual,
+       to_char(started_at, 'YYYY-MM') AS monthwise,
+       count(ride_id) AS count
+FROM vfinal_cb
+GROUP BY monthwise, member_casual;
+
+#Result
++-------------+---------+------+
+|member_casual|monthwise|count |
++-------------+---------+------+
+|casual       |2021-02  |8442  |
+|member       |2021-02  |33392 |
+|casual       |2021-03  |74507 |
+|member       |2021-03  |126512|
+|casual       |2021-04  |118518|
+|member       |2021-04  |172849|
+|casual       |2021-05  |212944|
+|member       |2021-05  |227209|
+|casual       |2021-06  |298255|
+|member       |2021-06  |295611|
+|casual       |2021-07  |362580|
+|member       |2021-07  |312929|
+|casual       |2021-08  |335641|
+|member       |2021-08  |322859|
+|casual       |2021-09  |287920|
+|member       |2021-09  |318312|
+|casual       |2021-10  |185827|
+|member       |2021-10  |278808|
+|casual       |2021-11  |68650 |
+|member       |2021-11  |178845|
+|casual       |2021-12  |44292 |
+|member       |2021-12  |126202|
+|casual       |2022-01  |12352 |
+|member       |2022-01  |64994 |
++-------------+---------+------+
+--monthwise counts of casual and members
+```
+
+```sql
+SELECT rideable_type,
+       count(ride_id) AS count,
+       member_casual
+FROM vfinal_cb
+WHERE member_casual = 'member'
+GROUP BY rideable_type, member_casual;
+
+#Result
++-------------+-------+-------------+
+|rideable_type|count  |member_casual|
++-------------+-------+-------------+
+|classic_bike |1915556|member       |
+|electric_bike|542966 |member       |
++-------------+-------+-------------+
+
+SELECT rideable_type,
+       count(ride_id) AS count,
+       member_casual
+FROM vfinal_cb
+WHERE member_casual = 'casual'
+GROUP BY rideable_type, member_casual;
+
+#Result
++-------------+-------+-------------+
+|rideable_type|count  |member_casual|
++-------------+-------+-------------+
+|classic_bike |1237677|casual       |
+|docked_bike  |306590 |casual       |
+|electric_bike|465661 |casual       |
++-------------+-------+-------------+
+
+```
+
+```sql
+SELECT to_char(started_at,'Day') AS "day",
+       member_casual,
+       count(ride_id) AS no_riders
+FROM vfinal_cb
+GROUP BY   "day", member_casual
+ORDER BY day;
+
+##Result
++---------+-------------+---------+
+|day      |member_casual|no_riders|
++---------+-------------+---------+
+|Wednesday|casual       |214187   |
+|Wednesday|member       |385926   |
+|Tuesday  |casual       |211288   |
+|Tuesday  |member       |377621   |
+|Thursday |casual       |220132   |
+|Thursday |member       |362470   |
+|Sunday   |casual       |395709   |
+|Sunday   |member       |300503   |
+|Saturday |casual       |459472   |
+|Saturday |member       |343744   |
+|Monday   |casual       |224704   |
+|Monday   |member       |335989   |
+|Friday   |casual       |284436   |
+|Friday   |member       |352269   |
++---------+-------------+---------+
+```
+
+Creating tableau visual graphs for clear insight on the patterns of the casual and member riders. This will help to provide recommendations on the findings.
