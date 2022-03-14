@@ -1,5 +1,3 @@
-# Capstone Project 2022
-
 # Google-Data-Analytics-Capstone-Project-2022
 
 ## ****Compare how Cyclistic Bikes Member and Casual riders use bikes****
